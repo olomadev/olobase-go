@@ -1,0 +1,41 @@
+basePath: /api
+definitions:
+  user.CreateUserDTO:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    required:
+    - email
+    - name
+    type: object
+host: localhost:3000
+info:
+  contact: {}
+  description: Swagger destekli modüler Go API
+  title: MyApp API
+  version: "1.0"
+paths:
+  /user:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user.CreateUserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Create a user
+swagger: "2.0"
