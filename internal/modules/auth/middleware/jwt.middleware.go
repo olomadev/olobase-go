@@ -25,8 +25,9 @@ func JwtAuthMiddleware(c *fiber.Ctx) error {
     return c.Next()
 }
 
-func GenerateToken(email string) (string, error) {
+func GenerateToken(id string, email string) (string, error) {
     claims := jwt.MapClaims{
+        "id": id,
         "email": email,
         "exp":   time.Now().Add(time.Hour * 1).Unix(),
     }
