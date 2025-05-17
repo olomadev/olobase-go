@@ -8,14 +8,18 @@ import (
 )
 
 func SetupRoutes(app *fiber.App) {
-    
+    // DB connection
     dbConnection, err := db.NewDBConnection()
     if err != nil {
         panic("Database connection error: " + err.Error())
     }
 
-    authService := &service.AuthService{DB: dbConnection}
+    // AuthService'i NewAuthService fonksiyonuyla oluştur
+    authService := service.NewAuthService(dbConnection)
+
+    // Handler oluştur
     tokenHandler := &handler.TokenHandler{AuthService: authService}
 
+    // Route tanımla
     app.Post("/api/auth/token", tokenHandler.HandleToken)
 }

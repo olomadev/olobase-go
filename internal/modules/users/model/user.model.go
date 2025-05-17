@@ -1,30 +1,33 @@
 package model
 
 import (
-    "github.com/google/uuid"
-    "gorm.io/gorm"
     "time"
+    "github.com/google/uuid"
 )
 
 type User struct {
-    ID               string    `gorm:"type:char(36);primaryKey" json:"id"`
-    Email            string    `gorm:"type:varchar(160);unique" json:"email"`
-    Password         string    `gorm:"type:varchar(255)" json:"-"`
-    FirstName        string    `gorm:"type:varchar(120)" json:"firstname"`
-    LastName         string    `gorm:"type:varchar(120)" json:"lastname"`
-    CreatedAt        time.Time `gorm:"column:createdAt;autoCreateTime" json:"createdAt"`
-    UpdatedAt        time.Time `gorm:"column:updatedAt;autoUpdateTime" json:"updatedAt"`
-    IsActive         bool      `gorm:"column:isActive;default:true" json:"isActive"`
-    IsEmailActivated bool      `gorm:"column:isEmailActivated;default:false" json:"isEmailActivated"`
+    ID               string    `json:"id"`
+    Email            string    `json:"email"`
+    Password         string    `json:"-"`
+    FirstName        string    `json:"firstname"`  // Bu json:"firstName" etiketi sadece JSON (örneğin API output) içindir. SQL için hiçbir etkisi yoktur.
+    LastName         string    `json:"lastname"`
+    CreatedAt        time.Time `json:"createdAt"`
+    UpdatedAt        time.Time `json:"updatedAt"`
+    IsActive         bool      `json:"isActive"`
+    IsEmailActivated bool      `json:"isEmailActivated"`
 }
 
-// TableName fonksiyonu ile tablonun ismini belirtmek
-func (User) TableName() string {
-    return "users"
-}
-
-// BeforeCreate callback'ini kullanarak UUID oluşturulması
-func (user *User) BeforeCreate(tx *gorm.DB) (err error) {
-    user.ID = uuid.New().String() // Her yeni kullanıcı için UUID oluşturulur
-    return nil
+// NewUser yeni bir kullanıcı nesnesi oluşturur
+func NewUser(email, password, firstName, lastName string) *User {
+    return &User{
+        ID:               uuid.New().String(),
+        Email:            email,
+        Password:         password,
+        FirstName:        firstName,
+        LastName:         lastName,
+        CreatedAt:        time.Now(),
+        UpdatedAt:        time.Now(),
+        IsActive:         true,
+        IsEmailActivated: false,
+    }
 }

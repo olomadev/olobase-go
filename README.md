@@ -3,6 +3,15 @@
 
 Go backend tutorial
 
+# Installing Go
+
+```sh
+apt update
+apt install golang -y
+go version
+```
+
+
 ## Installing Dependencies
 
 ```sh

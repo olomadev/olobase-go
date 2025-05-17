@@ -1,21 +1,54 @@
 package service
 
 import (
+    "context"
+    "database/sql"
     "errors"
+    sq "github.com/Masterminds/squirrel"
     "github.com/alexedwards/argon2id"
     "github.com/olomadev/olobase-go/internal/modules/users/model"
-    "gorm.io/gorm"
 )
 
 type AuthService struct {
-    DB *gorm.DB
+    DB *sql.DB
+    Builder sq.StatementBuilderType
 }
 
-func (s *AuthService) AuthenticateUser(username string, password string) (*model.User, error) {
-    var user model.User
+func NewAuthService(db *sql.DB) *AuthService {
+    return &AuthService{
+        DB: db,
+        Builder: sq.StatementBuilder.PlaceholderFormat(sq.Question),
+    }
+}
 
-    if err := s.DB.Where("email = ?", username).First(&user).Error; err != nil {
-        return nil, errors.New("invalid credentials")
+func (s *AuthService) AuthenticateUser(ctx context.Context, username string, password string) (*model.User, error) {
+    query := s.Builder.
+        Select("id", "email", "password", "firstname", "lastname", "createdAt", "updatedAt", "isActive").
+        From("users").
+        Where(sq.Eq{"email": username})
+
+    sqlStr, args, err := query.ToSql()
+    if err != nil {
+        return nil, err
+    }
+
+    var user model.User
+    // Sorguyu çalıştır
+    row := s.DB.QueryRowContext(ctx, sqlStr, args...)
+    err = row.Scan(
+        &user.ID,
+        &user.Email,
+        &user.Password,
+        &user.FirstName,
+        &user.LastName,
+        &user.CreatedAt,
+        &user.UpdatedAt,
+    )
+    if err != nil {
+        if errors.Is(err, sql.ErrNoRows) {
+            return nil, errors.New("invalid credentials")
+        }
+        return nil, err
     }
 
     // Argon2 hash verify
@@ -23,7 +56,6 @@ func (s *AuthService) AuthenticateUser(username string, password string) (*model
     if err != nil {
         return nil, errors.New("error verifying password")
     }
-
     if !match {
         return nil, errors.New("invalid credentials")
     }

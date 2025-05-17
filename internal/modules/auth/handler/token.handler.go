@@ -36,9 +36,7 @@ func (h *TokenHandler) HandleToken(c *fiber.Ctx) error {
     if err := c.BodyParser(&payload); err != nil {
         return c.Status(400).JSON(fiber.Map{"error": "invalid input"})
     }
-
-    // AuthService ile kullanıcıyı doğrulama
-    user, err := h.AuthService.AuthenticateUser(payload.Username, payload.Password)
+    user, err := h.AuthService.AuthenticateUser(c.Context(), payload.Username, payload.Password)
     if err != nil {
         return c.Status(401).JSON(fiber.Map{"error": "invalid credentials"})
     }
